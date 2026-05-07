@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema em Manutenção</title>
+  <!-- Favicon adicionado -->
+  <link rel="icon" type="image/png" href="icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal:    #21a78a;
+      --teal-dk: #178a71;
+      --teal-lt: #2ecba8;
+      --bg:      #0e2e28;
+      --card:    #15413a;
+      --card2:   #1a4d44;
+      --text:    #e8f7f4;
+      --muted:   #7dbfb3;
+    }
+
+    body {
+      min-height: 100dvh;
+      background: var(--bg);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.25rem;
+      overflow: hidden;
+      position: relative;
+    }
+
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: .18;
+      pointer-events: none;
+    }
+    body::before { width: 520px; height: 520px; background: var(--teal); top: -160px; right: -180px; }
+    body::after { width: 400px; height: 400px; background: var(--teal-lt); bottom: -140px; left: -140px; }
+
+    .dots {
+      position: fixed; inset: 0; pointer-events: none;
+      background-image: radial-gradient(circle, rgba(33,167,138,.18) 1px, transparent 1px);
+      background-size: 28px 28px;
+      z-index: 0;
+    }
+
+    .card {
+      position: relative; z-index: 1;
+      background: var(--card);
+      border: 1px solid rgba(33,167,138,.25);
+      border-radius: 28px;
+      padding: 2.5rem 2rem;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 32px 80px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.04) inset;
+    }
+
+    .logo-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: .65rem;
+      margin-bottom: 2.5rem;
+    }
+    .logo-icon {
+      width: 44px; height: 44px;
+      background: var(--teal);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 24px rgba(33,167,138,.4);
+      overflow: hidden;
+    }
+    .logo-icon img { width: 28px; height: 28px; object-fit: contain; }
+    .logo-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      color: var(--text);
+    }
+
+    .gear-wrap { position: relative; width: 110px; height: 110px; margin: 0 auto 2rem; }
+    .pulse-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--teal); opacity: 0; animation: pulse 2.4s ease-out infinite; }
+    .pulse-ring:nth-child(2) { animation-delay: .8s; }
+    .pulse-ring:nth-child(3) { animation-delay: 1.6s; }
+    @keyframes pulse { 0% { transform: scale(.7); opacity: .6; } 100% { transform: scale(1.5); opacity: 0; } }
+    .gear-circle { position: absolute; inset: 12px; background: var(--card2); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1.5px solid rgba(33,167,138,.3); }
+    .gear-icon { animation: spin 7s linear infinite; color: var(--teal); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    h1 { font-family: 'Syne', sans-serif; font-size: 1.55rem; font-weight: 700; letter-spacing: -.03em; line-height: 1.2; margin-bottom: .75rem; }
+    h1 span { color: var(--teal-lt); }
+    p.sub { font-size: .93rem; color: var(--muted); line-height: 1.6; margin-bottom: 2rem; }
+    .progress-label { display: flex; justify-content: space-between; font-size: .78rem; color: var(--muted); margin-bottom: .5rem; font-weight: 500; }
+    .progress-track { height: 6px; background: rgba(255,255,255,.08); border-radius: 99px; overflow: hidden; margin-bottom: 2rem; }
+    .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--teal), var(--teal-lt)); width: 0%; animation: fill 4s cubic-bezier(.4,0,.2,1) forwards; box-shadow: 0 0 10px rgba(46,203,168,.5); }
+    @keyframes fill { to { width: 72%; } }
+
+    .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: 2rem; }
+    .pill { background: rgba(255,255,255,.05); border: 1px solid rgba(33,167,138,.15); border-radius: 12px; padding: .65rem .75rem; text-align: left; display: flex; align-items: center; gap: .5rem; }
+    .pill-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .pill-dot.ok { background: var(--teal-lt); box-shadow: 0 0 6px var(--teal-lt); }
+    .pill-dot.warn { background: #f5c542; box-shadow: 0 0 6px #f5c542; animation: blink 1.2s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+    .pill-text { font-size: .78rem; color: var(--muted); line-height: 1.3; }
+    .pill-text strong { display: block; color: var(--text); font-size: .82rem; font-weight: 500; }
+
+    .footer-note { font-size: .78rem; color: rgba(125,191,179,.6); }
+    .footer-note a { color: var(--teal-lt); text-decoration: none; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="dots"></div>
+
+  <div class="card">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <img src="icon.png" alt="Logo">
+      </div>
+      <span class="logo-name">PicPay</span>
+    </div>
+
+    <div class="gear-wrap">
+      <div class="pulse-ring"></div>
+      <div class="pulse-ring"></div>
+      <div class="pulse-ring"></div>
+      <div class="gear-circle">
+        <svg class="gear-icon" xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </div>
+    </div>
+
+    <h1>Estamos em <span>manutenção</span></h1>
+    <p class="sub">Nossa equipe está trabalhando para voltar o mais rápido possível. Suas transações e saldo estão protegidos.</p>
+
+    <div class="progress-label">
+      <span>Restaurando serviços</span>
+      <span id="pct">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill"></div>
+    </div>
+
+    <div class="status-grid">
+      <div class="pill">
+        <div class="pill-dot ok"></div>
+        <div class="pill-text"><strong>Saldo</strong>Protegido</div>
+      </div>
+      <div class="pill">
+        <div class="pill-dot ok"></div>
+        <div class="pill-text"><strong>Dados</strong>Seguros</div>
+      </div>
+      <div class="pill">
+        <div class="pill-dot warn"></div>
+        <div class="pill-text"><strong>Pagamentos</strong>Indisponível</div>
+      </div>
+      <div class="pill">
+        <div class="pill-dot warn"></div>
+        <div class="pill-text"><strong>Pix</strong>Indisponível</div>
+      </div>
+    </div>
+
+    <p class="footer-note">
+      Acompanhe em <a href="https://status.picpay.com" target="_blank">status.picpay.com</a>
+    </p>
+  </div>
+
+  <script>
+    const el = document.getElementById('pct');
+    const duration = 4000, target = 72;
+    let start = null;
+    function step(ts) {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / duration, 1);
+      el.textContent = Math.round(p * target) + '%';
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  </script>
+</body>
+</html>
+
